@@ -2,7 +2,7 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
     <url>
-      <loc>test.domain.com/blog/welcome-to-massively-the-jekyll-theme/</loc>
+      <loc>/blog/welcome-to-massively-the-jekyll-theme/</loc>
       
         <lastmod>2017-10-31T00:00:00+08:00</lastmod>
       
@@ -12,7 +12,7 @@
   
   
     <url>
-      <loc>test.domain.com/about/</loc>
+      <loc>/about/</loc>
        <lastmod>2017-11-02T00:00:00+08:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -22,7 +22,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/blog/</loc>
+      <loc>/blog/</loc>
        <lastmod>2017-11-02T00:00:00+08:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -32,7 +32,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/elements/</loc>
+      <loc>/elements/</loc>
        <lastmod>2017-11-02T00:00:00+08:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -42,7 +42,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/</loc>
+      <loc>/</loc>
        <lastmod>2017-11-02T00:00:00+08:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -52,7 +52,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/assets/css/main.css</loc>
+      <loc>/assets/css/main.css</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -62,7 +62,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/assets/css/noscript.css</loc>
+      <loc>/assets/css/noscript.css</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -72,7 +72,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/sitemap.xml</loc>
+      <loc>/sitemap.xml</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -82,7 +82,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/thank-you/</loc>
+      <loc>/thank-you/</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -92,7 +92,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/feed.xml</loc>
+      <loc>/feed.xml</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
@@ -102,7 +102,7 @@
      </url>
   
     <url>
-      <loc>test.domain.com/feed.xslt.xml</loc>
+      <loc>/feed.xslt.xml</loc>
        <lastmod>2017-11-10T00:20:35+00:00</lastmod>
       
        <changefreq>weekly</changefreq>
