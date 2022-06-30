@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label</title>
+
+    <link href="dist/bootstrap5.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="dist/handsontable.full.min.css" />
+
+    <script src="dist/bootstrap5.2.0/js/bootstrap.min.js" defer></script>
+    <script src="dist/jquery-3.6.0.min.js" defer></script>
+    <script src="dist/handsontable.full.min.js" defer></script>
+
+    <script src="common/webStorage.js"></script>
+    <script src="script/fbaLabels.js" defer></script>
+</head>
+<body>
+<nav class="navbar navbar-dark navbar-expand-lg bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Daisy's work page</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link" href="./index.html">FBA-Input</a>
+                <a class="nav-link active" aria-current="page" href="./lableGen.html">Label</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-grid gap-3 my-3">
+        <div class="card">
+            <div class="card-header">
+                ADD Label
+            </div>
+            <div class="card-body">
+                <form class="col-12 needs-validation" id="inForm" novalidate>
+                    <div id="inputs" class="row my-3"></div>             
+                    <div class="row">
+                        <div id="formButton" class=" text-end">
+                            <button class="btn btn-primary" type="submit">添加</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Table
+            </div>
+            <div class="card-body">
+                <div id="example"></div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                        <div class="col">
+                            <button id="clear" type="button" class="btn btn-danger">清空</button>
+                        </div>
+                    <div class="col-2 align-self-end">
+                        <div class="input-group inline-block">
+                            <button id="genLabel" class="btn btn-outline-secondary" type="button" id="button-addon1">生成Label</button>
+                            <input id="labelCount" type="number" value="3" class="form-control" placeholder="份数" style="width: 35px;">
+                            <span class="input-group-text">份</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="data/clientNumber.js"></script>
+    <script src="data/destination.js"></script>
+    <script defer>
+        const TODAY = (new Date()).toLocaleDateString()
+        const DATA = ["id", "clientNumber", "destination", "date", "banQuantity"];
+        const DATA_TAG = ['', "客户号", "目的地", "日期", "板数"];
+        const DATA_REQUIRED = [false, true, true, false, true];
+        const DATA_INPUT_TYPE = ["hidden", "text", "text", "date", "number"];
+        const DATA_INPUT_ID_SUFFIX = 'Input';
+        const DATA_INPUT_DEFAULT_VALUE = ['', '', '', new Date(TODAY), ''];
+
+        const DATA_HAS_DATALIST = ["clientNumber", "destination"];
+        const DATALIST_ID_SUFFIX = 'DatalistOptions';
+
+        //init input
+        Array.from(DATA).forEach((data, index) => {
+            let id = data + DATA_INPUT_ID_SUFFIX;
+            let div = document.createElement('div');
+            div.classList.add('col-3');
+
+            if (DATA_TAG[index]) {
+                let label = document.createElement('label');
+                label.classList.add('form-label');
+                label.setAttribute('for', id);
+                label.textContent = DATA_TAG[index];
+                div.appendChild(label);
+            }
+
+            let input = document.createElement('input');
+            input.className = 'form-control data';
+            input.setAttribute('type', DATA_INPUT_TYPE[index]);
+            input.setAttribute('id', id);
+            input.setAttribute('name', data);
+            if (DATA_REQUIRED[index]) {
+                input.setAttribute('required', true);
+            }
+            let defaultValue = DATA_INPUT_DEFAULT_VALUE[index];
+            if (defaultValue) {
+                if (data === 'date') {
+                    input.valueAsDate = defaultValue;
+                } else {
+                    input.value = defaultValue;
+                }
+            }
+
+            if (DATA_TAG[index]) {
+                div.appendChild(input);
+                document.getElementById('inputs').appendChild(div);
+            } else {
+                document.getElementById('inputs').appendChild(input);
+            }
+        });
+
+        const DEFAULT_RECORDS_KEYS = ['clientNumberInputs', 'destinationInputs'];
+        const RECORDS_STORAGE_TYPE = 'localStorage';
+        storageAvailable(RECORDS_STORAGE_TYPE);
+
+        //init datalist
+        Array.from(DATA_HAS_DATALIST).forEach(data => {
+            let id = data + DATA_INPUT_ID_SUFFIX;
+            let datalistId = data + DATALIST_ID_SUFFIX;
+            let input = document.getElementById(id);
+            input.setAttribute('list', datalistId);
+
+            let datalist = document.createElement('datalist');
+            datalist.setAttribute('id', datalistId);
+
+            const index = DATA_HAS_DATALIST.indexOf(data);
+            const key = DEFAULT_RECORDS_KEYS[index];
+            const options = getRecordsInWebStorage(key, RECORDS_STORAGE_TYPE, eval(key));
+            Array.from(options).forEach(option => {
+                const optionTag = document.createElement('option');
+                optionTag.setAttribute('value', option);
+                optionTag.textContent = option;
+                datalist.appendChild(optionTag);
+            })
+        
+
+            input.parentElement.appendChild(datalist);
+        });
+    </script>
+</body>
+</html>

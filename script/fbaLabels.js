@@ -46,6 +46,8 @@ const hot = new Handsontable(container, {
     licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
 });
 
+const AFTER_SUBMIT_BE_EMPTY = ['destination', 'banQuantity']
+
 //form submit event
 document.getElementById('inForm').addEventListener('submit', event => {
     //console.log(`Form Submitted! Time stamp: ${event.timeStamp}`);
@@ -57,7 +59,7 @@ document.getElementById('inForm').addEventListener('submit', event => {
             let name = input.getAttribute('name');
             label[name] = input.value;
 
-            if (DATA_HAS_DATALIST.includes(name)) {
+            if (DATA_HAS_DATALIST.includes(name) && input.value) {
                 let index = DATA_HAS_DATALIST.indexOf(name);
                 if (addRecordsInWebStorage(DEFAULT_RECORDS_KEYS[index], RECORDS_STORAGE_TYPE, input.value)) {
                     let datalist = document.getElementById(name + DATALIST_ID_SUFFIX)
@@ -66,6 +68,10 @@ document.getElementById('inForm').addEventListener('submit', event => {
                     optionTag.textContent = input.value;
                     datalist.appendChild(optionTag);
                 }
+            }
+
+            if (AFTER_SUBMIT_BE_EMPTY.includes(name)) {
+                document.getElementById(name + DATA_INPUT_ID_SUFFIX).value = '';
             }
         });
         console.log(label);
@@ -93,13 +99,13 @@ hot.addHook('beforeRemoveRow', (index, amount, physicalRows) => {
         needRemoveId.push(hot.getSourceDataAtRow(row).id);
     })
 
-    const allDataKey = getAllDataKeyInWebStorage(type)
+    const allDataKey = getAllDataKeyInWebStorage(LABEL_STORAGE_TYPE)
     needRemoveId.forEach(id => {
         const index = allDataKey.indexOf(id);
         if (index > -1) {
             allDataKey.splice(index, 1);
         }
-        removeByIdInWebStorage(id);
+        removeByIdInWebStorage(id, LABEL_STORAGE_TYPE);
     });
     setAllDataKeyInWebStorage(LABEL_STORAGE_TYPE, allDataKey);
 })
@@ -116,7 +122,7 @@ hot.addHook('afterChange', (changes) => {
 
 document.getElementById('genLabel').addEventListener('click', e => {
     let labelCount = document.getElementById('labelCount').value
-    window.open(`./LabelsStyle.html?labelCount=${labelCount}`, "_blank");
+    window.open(`./LabelsStyle.html?labelCount=${labelCount}&storageType=${LABEL_STORAGE_TYPE}&allDataKey=${ALL_DATA_KEY}`, "_blank");
 })
 
 document.getElementById('clear').addEventListener('click', e => {

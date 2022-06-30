@@ -6,41 +6,76 @@
 //else {
 //   Too bad, no localStorage for us
 //}
+
+const webStorageAPIList = ['localStorage', 'sessionStorage'];
+const runtimeSave = {};
+
 function storageAvailable(type) {
-    var storage;
-    try {
-        storage = window[type];
-        var x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
+    if (isWebStoreage(type)) {
+        var storage;
+        try {
+            storage = window[type];
+            var x = '__storage_test__';
+            storage.setItem(x, x);
+            storage.removeItem(x);
+            return true;
+        }
+        catch(e) {
+            return e instanceof DOMException && (
+                // everything except Firefox
+                e.code === 22 ||
+                // Firefox
+                e.code === 1014 ||
+                // test name field too, because code might not be present
+                // everything except Firefox
+                e.name === 'QuotaExceededError' ||
+                // Firefox
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                // acknowledge QuotaExceededError only if there's something already stored
+                (storage && storage.length !== 0);
+        }
+    }
+
+    return true;
+}
+
+function isWebStoreage(type)
+{
+    if (webStorageAPIList.includes(type)) {
         return true;
     }
-    catch(e) {
-        return e instanceof DOMException && (
-            // everything except Firefox
-            e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === 'QuotaExceededError' ||
-            // Firefox
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-            // acknowledge QuotaExceededError only if there's something already stored
-            (storage && storage.length !== 0);
-    }
+
+    return false;
 }
 
 function getByIdInWebStorage(id, type) {
-    return JSON.parse(window[type].getItem(id))
+    if (isWebStoreage(type)) {
+        return JSON.parse(window[type].getItem(id))
+    }
+
+    if (runtimeSave[id]) {
+        return JSON.parse(runtimeSave[id]);
+    }
+
+    return null;
 }
 
 function setByIdInWebStorage(id, type, value) {
-    window[type].setItem(id, JSON.stringify(value));
+    if (isWebStoreage(type)) {
+        window[type].setItem(id, JSON.stringify(value));
+    }
+
+    runtimeSave[id] = JSON.stringify(value);
 }
 
 function removeByIdInWebStorage(id, type) {
-    window[type].removeItem(id);
+    if (isWebStoreage(type)) {
+        window[type].removeItem(id);
+    }
+
+    if (runtimeSave[id]) {
+        delete runtimeSave[id];
+    }
 }
 
 function clearInWebStorage(type) {
@@ -52,9 +87,10 @@ function clearInWebStorage(type) {
 }
 
 function getAllDataKeyInWebStorage(type) {
-    if (!window[type].getItem(ALL_DATA_KEY)) {
+    if (!getByIdInWebStorage(ALL_DATA_KEY, type)) {
         setByIdInWebStorage(ALL_DATA_KEY, type, []);
     }
+
     return getByIdInWebStorage(ALL_DATA_KEY, type);
 }
 
@@ -85,7 +121,7 @@ function saveDataByIdInWebStorage(id, type, data) {
 
 // datalist records
 function getRecordsInWebStorage(id, type, defaultValue) {
-    if (!window[type].getItem(id)) {
+    if (!getByIdInWebStorage(id, type)) {
         setByIdInWebStorage(id, type, defaultValue);
     }
     return getByIdInWebStorage(id, type);

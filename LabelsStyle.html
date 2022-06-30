@@ -4,46 +4,44 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Labels</title>
     <script type="text/javascript" src="common/genLabels.js"></script>
+    <script type="text/javascript" src="common/webStorage.js"></script>
 </head>
 <body>
     
     <script>
-        const ALL_DATA_KEY = 'allLabels';
-
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        const labelCount = urlParams.get('labelCount')
+        const labelCount = urlParams.get('labelCount');
+        const ALL_DATA_KEY = urlParams.get('allDataKey');
+        const STORAGE_TYPE = urlParams.get('storageType');
 
-        let allLable = Array.from(JSON.parse(sessionStorage.getItem(ALL_DATA_KEY)));
-        let data = [];
-        allLable.forEach(labelId => {
-            let alabel = JSON.parse(sessionStorage.getItem(labelId))
-            data.push(alabel);
-        });
+        if (isWebStoreage(STORAGE_TYPE)) {
+            let data = getAllDataInWebStorage(STORAGE_TYPE);
 
-        const style = document.createElement('style');
-        style.textContent = 'h1{margin: 0;} body{padding: 10px 0; text-align: center;} div {font-size: 6vw;}';
-        document.querySelector('head').appendChild(style);
+            const style = document.createElement('style');
+            style.textContent = 'h1{margin: 0;} body{padding: 10px 0; text-align: center;} div {font-size: 6vw;}';
+            document.querySelector('head').appendChild(style);
 
-        const all = genLabels(data, labelCount);
-        Array.from(all).forEach(every => {
-            let div = document.createElement('div');
-            let clientNumber = document.createElement('h1');
-            clientNumber.textContent = every[0];
-            div.appendChild(clientNumber);
+            const all = genLabels(data, labelCount);
+            Array.from(all).forEach(every => {
+                let div = document.createElement('div');
+                let clientNumber = document.createElement('h1');
+                clientNumber.textContent = every[0];
+                div.appendChild(clientNumber);
 
-            let target = document.createElement('h1');
-            target.textContent = every[1];
-            div.appendChild(target);
+                let target = document.createElement('h1');
+                target.textContent = every[1];
+                div.appendChild(target);
 
-            let date = document.createElement('h1');
-            date.textContent = every[2];
-            div.appendChild(date);
+                let date = document.createElement('h1');
+                date.textContent = every[2];
+                div.appendChild(date);
 
-            document.querySelector('body').appendChild(div);
-        })
+                document.querySelector('body').appendChild(div);
+            })
+        }
     </script>
 </body>
 </html>

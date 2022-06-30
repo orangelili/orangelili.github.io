@@ -1,114 +1,30 @@
 'use strict'
 
-const TODAY = new Date();
-const TODAY_VIEW_DATE = (TODAY.getMonth() + 1) + '月' + TODAY.getDate() + '日';
+let fbaInfo = {
+    "id": '',
+    "truckNumber": '',
+    "clientNumber": '',
+    "destination": '',
+    "date": '',
+    "client": '',
+    "fbaNumber": '',
+    "bolNumber": '',
+    "banQuantity": 0,
+    "driver": '',
+    "container": '',
+};
 
-function addInputLi(value, id, option = null) {
-    let li = document.createElement("li");
-    li.classList.add("list-group-item");
-    if (option) {
-        li.classList.add(option)
-    }
-    li.textContent = '"' + value + '",';
-    document.getElementById(id).append(li);
-}
+const FBA_INFO_ID_PREFIX = 'fbaInfo';
+const ALL_DATA_KEY = 'allFBAInfo';
+const FBA_INFO_DATA = ["truckNumber", "clientNumber", "destination", "date", "client", "fbaNumber", "bolNumber", "banQuantity", "driver", "container"];
+const FBA_DATA_TAG = ["车次","客户号", "目的地", "日期", "客户", "FBA号", "客户BOL编号","板数", "司机", "柜号"];
+const FBA_STORAGE_TYPE = 'sessionStorage';
+// const FBA_STORAGE_TYPE = 'page';
+const FBA_DATALIST_STORAGE_TYPE = 'localStorage'
 
-//table
-const table = $('#example').DataTable({
-    data: [],
-    paging: false,
-    stateSave: true,
-    columns: [
-        {
-            title: '车次',
-        },
-        {
-            title: '客户号',
-        },
-        {
-            title: '目的地',
-        },
-        {
-            title: '日期',
-        },
-        {
-            title: '客户',
-        },
-        {
-            title: 'FBA号',
-        },
-        {
-            title: '客户BOL编号',
-        },
-        {
-            title: '板数',
-        },
-        {
-            title: '司机',
-        },
-        {
-            title: '柜号',
-        }
-    ],
-});
+storageAvailable(FBA_STORAGE_TYPE);
 
-$('#example tbody').on('click', 'tr', function () {
-    $(this).toggleClass('selected');
-});
-
-$('#removeRows').on('click', event => {
-    table.rows('.selected').remove().draw(false)
-});
-
-$('#download').on('click', event => {
-    let allData = Array.from(table.data());
-    if (allData.length !== 0) {
-        let content = '';
-        Array.from(allData).forEach(info =>
-            content += (info.join("\t") + "\n")
-        );
-        let blob = new Blob([content],
-            { type: "text/plain;charset=utf-8" });
-        saveAs(blob, "FBA_IN.txt");
-    }
-});
-
-$('#genLabel').on('click', event => {
-    let allData = Array.from(table.data());
-    if (allData.length !== 0) {
-        let labelCount = document.getElementById('labelCount').value ? parseInt(document.getElementById('labelCount').value) : 3;
-        let content = '<html> <head> <style>h1{margin: 0;} body{padding: 10px 0; text-align: center;} div {font-size: 6vw;  } </style></head><body><div>';
-        Array.from(allData).forEach(info => {
-            content += '<div>';
-            let quantity = parseInt(info['7'])
-            let count = 1
-            while (count <= quantity) {
-                for (let i = 0; i < labelCount; i++) {
-                    content += '<h1>' + info[1] + ' </h1>';
-                    content += '<h1>' + info[2] + '(' + count + '/' + quantity + ')</h1>'
-                    let parseDate = info[3].split("月");
-                    let month = parseDate[0];
-                    if (month.length < 2) {
-                        month = '0' + month;
-                    }
-                    let day = (parseDate[1].split("日"))[0]
-                    content += '<h1>' + month + '-' + day + '-2022</h1>';
-                }
-                count += 1
-            }
-            content += '</div>';
-        });
-        content += '</div></body></html>';
-        let blob = new Blob([content],
-            { type: "text/html;charset=utf-8" });
-        saveAs(blob, "FBA_LABEL.html");
-    }
-});
-
-//form
 const forms = document.querySelectorAll('.needs-validation');
-
-// Loop over them and prevent submission
 Array.from(forms).forEach(form => {
     form.addEventListener('submit', event => {
         if (!form.checkValidity()) {
@@ -119,102 +35,137 @@ Array.from(forms).forEach(form => {
     }, false);
 });
 
-//add datalist
-const inputDatalists = {
-    "truckCountInputs": "truckNumberDatalistOptions",
-    "clientNumberInputs": "clientNumberDatalistOptions",
-    "destinationInputs": "destinationDatalistOptions",
-    "clientInputs": "clientDatalistOptions",
-    "bolNumberInputs": "BOLNumberDatalistOptions",
-    "driverInputs": "driverDatalistOptions",
-    "containerNumberInputs": "containerDatalistOptions",
-};
+const container = document.getElementById('example');
+const cols = [];
+FBA_INFO_DATA.forEach(name => {
+    cols.push({ data: name });
+})
+const hot = new Handsontable(container, {
+    data: getFBAS(),
+    rowHeaders: true,
+    colHeaders: FBA_DATA_TAG,
+    columnSorting: true,
+    contextMenu: ['copy', 'remove_row'],
+    selectionMode: 'multiple',
+    width: '100%',
+    height: 'auto',
+    stretchH: 'all',
+    copyPaste: true,
+    columns: cols,
+    licenseKey: 'non-commercial-and-evaluation', // for non-commercial use only
+});
 
-const datalistsMap = {
-    "truckNumber": "truckCountInputs",
-    "clientNumber": "clientNumberInputs",
-    "destination": "destinationInputs",
-    "client": "clientInputs",
-    "BOLNumber": "bolNumberInputs",
-    "driver": "driverInputs",
-    "container": "containerNumberInputs",
-};
-
-for (let [key, value] of Object.entries(inputDatalists)) {
-    Array.from(eval(key)).forEach(input => {
-        let option = document.createElement("option");
-        option.setAttribute('value', input);
-        option.textContent = input;
-        document.getElementById(value).append(option);
-    });
+function getFBAS() {
+    return getAllDataInWebStorage(FBA_STORAGE_TYPE);
 }
 
-for (let [key, value] of Object.entries(datalistsMap)) {
-    Array.from(eval(value)).forEach(input => {
-        addInputLi(input, value);
-    });
-}
+const AFTER_SUBMIT_BE_EMPTY = ['destination', 'banQuantity']
 
 //form submit event
 document.getElementById('inForm').addEventListener('submit', event => {
-    //console.log(`Form Submitted! Time stamp: ${event.timeStamp}`);
     event.preventDefault();
 
     if (event.target.checkValidity()) {
         const inputs = event.target.querySelectorAll('input.data');
-        let data = [];
         Array.from(inputs).forEach(input => {
             let name = input.getAttribute('name');
-            if (name == 'date') {
-                if (input.value) {
-                    let date_array = (input.value).split('-')
-                    let month = date_array[1];
-                    let day = date_array[2]
-                    data.push(month + '月' + day + '日');
-                } else {
-                    data.push(TODAY_VIEW_DATE);
+            fbaInfo[name] = input.value;
+
+            if (DATA_HAS_DATALIST.includes(name) && input.value) {
+                const key = name + DEFAULT_RECORDS_KEY_SUFFIX;
+                if (addRecordsInWebStorage(key, FBA_DATALIST_STORAGE_TYPE, input.value)) {
+                    let datalist = document.getElementById(name + DATALIST_ID_SUFFIX)
+                    const optionTag = document.createElement('option');
+                    optionTag.setAttribute('value', input.value);
+                    optionTag.textContent = input.value;
+                    datalist.appendChild(optionTag);
                 }
             }
 
-            if (name != 'flexdatalist-FBANumber' && name != 'date') {
-                data.push(input.value);
+            if (AFTER_SUBMIT_BE_EMPTY.includes(name)) {
+                document.getElementById(name + DATA_INPUT_ID_SUFFIX).value = '';
             }
-
-            //check exsit
-            if (input.value && Object.keys(datalistsMap).includes(name)) {
-                let array = eval(datalistsMap[name]);
-                if (name === 'FBANumber') {
-                    let manyValue = (input.value).split(',');
-                    manyValue.forEach(everyValue => {
-                        if (!array.includes(everyValue)) {
-                            array.push(everyValue);
-                            addInputLi(everyValue, datalistsMap[name], "text-bg-secondary");
-                        }
-                    })
-                } else {
-                    if (!array.includes(input.value)) {
-                        array.push(input.value);
-                        addInputLi(input.value, datalistsMap[name], "text-bg-secondary");
-                    }
-                }
-            }
-
         });
+        console.log(fbaInfo);
 
-        // localStorage.setItem('name','Chris');
-        console.log(data);
-        table.row.add(data).draw(false);
+        if (!fbaInfo.id) {
+            fbaInfo.id = FBA_INFO_ID_PREFIX + Date.now();
+        }
+
+        saveDataByIdInWebStorage(fbaInfo.id, FBA_STORAGE_TYPE, fbaInfo)
+
+        //refresh table
+        hot.updateSettings({
+            data: getFBAS(),
+        });
     }
 });
 
-//multiple selection
-// $('#validationFBANumber').flexdatalist({
-//     searchContain: true,
-//     minLength: 0,
-//     focusFirstResult: false,
-//     toggleSelected: true,
-// });
+hot.addHook('beforeRemoveRow', (index, amount, physicalRows) => {
+    let needRemoveId = [];
+    Array.from(physicalRows).forEach(row => {
+        needRemoveId.push(hot.getSourceDataAtRow(row).id);
+    })
 
-//var blob = new Blob(["Welcome to Websparrow.org."],
-//        { type: "text/plain;charset=utf-8" });
-//saveAs(blob, "static.txt");
+    const allDataKey = getAllDataKeyInWebStorage(FBA_STORAGE_TYPE)
+    needRemoveId.forEach(id => {
+        const index = allDataKey.indexOf(id);
+        if (index > -1) {
+            allDataKey.splice(index, 1);
+        }
+        removeByIdInWebStorage(id, FBA_STORAGE_TYPE);
+    });
+    setAllDataKeyInWebStorage(FBA_STORAGE_TYPE, allDataKey);
+})
+
+hot.addHook('afterChange', (changes) => {
+    if (changes) {
+        changes.forEach(([row, prop, oldValue, newValue]) => {
+            let aData = hot.getSourceDataAtRow(row);
+            aData[prop] = newValue;
+            setByIdInWebStorage(aData.id, FBA_STORAGE_TYPE, aData);
+        });
+    }
+})
+
+document.getElementById('clear').addEventListener('click', e => {
+    hot.clear();
+    clearInWebStorage(FBA_STORAGE_TYPE)
+})
+
+document.getElementById('copy').addEventListener('click', e => {
+    hot.selectAll();
+    hot.getPlugin('copyPaste').copy();
+})
+
+$('#download').on('click', event => {
+    if (hot.getData().length > 0) {
+        const exportPlugin = hot.getPlugin('exportFile');
+        const filename = 'FBA_INFO_' + (new Date()).toLocaleString();
+        exportPlugin.downloadFile('csv', {filename: filename});
+    }
+});
+
+$('#genLabel').on('click', event => {
+    const labelCount = document.getElementById('labelCount').value ? parseInt(document.getElementById('labelCount').value) : 3;
+
+    if (isWebStoreage(FBA_STORAGE_TYPE)) {
+        window.open(`./LabelsStyle.html?labelCount=${labelCount}&storageType=${FBA_STORAGE_TYPE}&allDataKey=${ALL_DATA_KEY}`, "_blank");
+    } else {
+        const data = hot.getSourceData();
+        const all = genLabels(data, labelCount);
+        let content = '<html> <head> <style>h1{margin: 0;} body{padding: 10px 0; text-align: center;} div {font-size: 6vw;  } </style></head><body><div>';
+        Array.from(all).forEach(every => {
+            content += '<div>';
+            content += '<h1>' + every[0] + ' </h1>';
+            content += '<h1>' + every[1] + ' </h1>';
+            content += '<h1>' + every[2] + ' </h1>';
+            content += '</div>';
+        });
+        content += '</div></body></html>';
+
+        let blob = new Blob([content],
+        { type: "text/html;charset=utf-8" });
+        saveAs(blob, "FBA_LABEL.html");
+    }
+});
